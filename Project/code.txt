@@ -1,0 +1,419 @@
+CREATE TABLE gaa4qu.Student (
+    Cod_S            INTEGER NOT NULL,
+    name           VARCHAR2(50 CHAR),
+    Age                  INTEGER,
+    Genre          VARCHAR2(20 CHAR),
+    grou           VARCHAR2(20 CHAR)
+)
+
+PCTFREE 10 PCTUSED 40 TABLESPACE users LOGGING
+    STORAGE ( INITIAL 65536 NEXT 1048576 PCTINCREASE 0 MINEXTENTS 1 MAXEXTENTS 2147483645 FREELISTS 1 FREELIST GROUPS 1 BUFFER_POOL DEFAULT )
+NO INMEMORY;
+
+
+ALTER TABLE gaa4qu.Student ADD CONSTRAINT Student_pk PRIMARY KEY ( Cod_S );
+
+CREATE SEQUENCE GAA4QU.Student_Cod_s_SEQ 
+START WITH 1 
+NOCACHE 
+    ORDER ;
+
+CREATE OR REPLACE TRIGGER GAA4QU.Student_Cod_s_TRG 
+BEFORE INSERT ON GAA4QU.Student 
+FOR EACH ROW 
+WHEN (NEW.Cod_S IS NULL) 
+BEGIN
+:new.Cod_S := gaa4qu.Student_Cod_s_seq.nextval;
+end;
+
+SELECT * FROM GAA4QU.student;
+
+SELECT * FROM GAA4QU.subject;
+
+SELECT * FROM GAA4QU.award;
+
+
+CREATE TABLE gaa4qu.Award (
+    IDA            INTEGER NOT NULL,
+    Category           VARCHAR2(30 CHAR),
+    ID_SW                  INTEGER
+)
+
+PCTFREE 10 PCTUSED 40 TABLESPACE users LOGGING
+    STORAGE ( INITIAL 65536 NEXT 1048576 PCTINCREASE 0 MINEXTENTS 1 MAXEXTENTS 2147483645 FREELISTS 1 FREELIST GROUPS 1 BUFFER_POOL DEFAULT )
+NO INMEMORY;
+
+
+ALTER TABLE gaa4qu.Award ADD CONSTRAINT Award_pk PRIMARY KEY ( IDA );
+
+CREATE SEQUENCE GAA4QU.Award_IDA_SEQ 
+START WITH 1 
+NOCACHE 
+    ORDER ;
+
+CREATE OR REPLACE TRIGGER GAA4QU.Award_IDA_TRG 
+BEFORE INSERT ON GAA4QU.Award 
+FOR EACH ROW 
+WHEN (NEW.IDA IS NULL) 
+BEGIN
+:new.IDA := gaa4qu.Award_IDA_seq.nextval;
+end;
+
+
+
+CREATE TABLE gaa4qu.Scient_Work (
+    ID_SW            INTEGER NOT NULL,
+    Title           VARCHAR2(20 CHAR),
+    Category         CHAR(2),
+    Pag                  INTEGER
+)
+
+PCTFREE 10 PCTUSED 40 TABLESPACE users LOGGING
+    STORAGE ( INITIAL 65536 NEXT 1048576 PCTINCREASE 0 MINEXTENTS 1 MAXEXTENTS 2147483645 FREELISTS 1 FREELIST GROUPS 1 BUFFER_POOL DEFAULT )
+NO INMEMORY;
+
+
+ALTER TABLE gaa4qu.Scient_Work ADD CONSTRAINT Scient_Work_pk PRIMARY KEY ( ID_SW );
+
+CREATE SEQUENCE GAA4QU.Scient_Work_ID_SW_SEQ 
+START WITH 1 
+NOCACHE 
+    ORDER ;
+
+CREATE OR REPLACE TRIGGER GAA4QU.Scient_Work_ID_SW_TRG 
+BEFORE INSERT ON GAA4QU.Scient_Work 
+FOR EACH ROW 
+WHEN (NEW.ID_SW IS NULL) 
+BEGIN
+:new.ID_SW := gaa4qu.Scient_Work_ID_SW_seq.nextval;
+end;
+
+SELECT * FROM GAA4QU.scient_work;
+
+
+
+
+SELECT sub.ids, sub.name  
+FROM student stu JOIN student_subject ssb ON stu.cod_s=ssb.cod_s 
+         join subject sub on ssb.IDS = sub.IDS 
+WHERE REGEXP_LIKE(sub.name, '[A-Za-z]') ;
+
+Select * from award;
+
+Select * from scient_work;
+
+Select * from student_work;
+
+Select * from student;
+
+Select * from student_subject;
+
+Select * from subject;
+
+
+select * from all_students_subect_with_latters_a_z;
+
+CREATE VIEW all_students_subect_with_latters_a_z (ID_SUBJECT, NAME_SUBJECT)
+	AS SELECT sub.ids, sub.name  
+FROM student stu JOIN student_subject ssb ON stu.cod_s=ssb.cod_s 
+         join subject sub on ssb.IDS = sub.IDS 
+WHERE REGEXP_LIKE(sub.name, '[A-Za-z]') ;
+
+select * from all_students_subect_with_latters_a_z;
+
+
+CREATE VIEW SUBJECT_PER_QUANTITY (Subject_Name,Student_Quantity ) AS
+select  subject.name  , COUNT(student_subject.cod_s)
+from student join Student_Subject on Student.Cod_S=Student_Subject.Cod_S Join Subject on Student_Subject.IDS=subject.ids 
+group by subject.name 
+having count(Student_Subject.Cod_S) < 2;
+
+SELECT * FROM SUBJECT_PER_QUANTITY;
+
+
+
+
+CREATE OR REPLACE PROCEDURE STUDENTS_BY_SCIENT_WORK_PAG (PAG NUMBER)
+IS 
+BEGIN 
+   select Student.Cod_S, Student.Name, student.genre, student.age, student.grou 
+FROM Student join student_work on Student.Cod_S = student_work.cod_s join scient_work on scient_work.id_sw = student_work.id_sw 
+where scient_work.pag <= pag
+END;
+
+
+
+
+
+
+
+select * from gaa4qu.subject_per_quantity;
+
+/* select * from student where cod_s <= 100; */
+
+SELECT * FROM scient_work 
+         WHERE id_sw not in ( select ID_SW
+                              from award);
+
+delete from award 
+where id_sw not in (select id_sw from scient_work);
+
+select * from award;
+
+select Student.Cod_S, Student.Name, student.genre, student.age, student.grou 
+FROM Student join student_work on Student.Cod_S = student_work.cod_s join scient_work on scient_work.id_sw = student_work.id_sw 
+where scient_work.pag <= 100000000;
+
+
+SELECT * from scient_work where category='A';
+
+CREATE OR REPLACE PROCEDURE STUDENTS_BY_SCIENT_WORK_PAG (PA in NUMBER) 
+
+IS 
+BEGIN 
+   select Student.Cod_S, Student.Name, student.genre, student.age, student.grou 
+FROM Student join student_work on Student.Cod_S = student_work.cod_s join scient_work on student_work.id_sw = scient_work.id_sw
+where scient_work.id_sw  IN (   select scient_work.id_sw
+FROM  scient_work 
+where scient_work.pag < pa);
+END;
+
+
+
+
+
+
+
+
+CREATE PROCEDURE STUDENTS_BY_SCIENT_WORK_PAG_10 () AS
+BEGIN 
+   select Student.Cod_S, Student.Name, student.genre, student.age, student.grou 
+FROM Student join student_work on Student.Cod_S = student_work.cod_s join scient_work on student_work.id_sw = scient_work.id_sw
+where scient_work.pag > 100  ;
+END;
+
+
+
+   select *
+FROM  scient_work 
+where scient_work.pag <= 50;
+
+
+SELECT * FROM STUDENTS_BY_SCIENT_WORK_PAG(50);
+
+
+Create or replace trigger SCIENT_WORK_AND_AWARD
+    instead of insert on ALLL
+begin
+    insert into SCIENT_WORK(ID_SW, TITLE, CATEGORY, PAG) values(:new.ID_SW, :new.TITLE, :new.CATEGORY, :new.pag);
+    insert into award(IDA, category, id_sw) values(:new.IDA, :new.category, :new.id_sw);
+    dbms_output.put_line('Successfully inserted into SCIENT_WORK and award!');
+end;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+create or replace function grade_avg(n integer)
+return number
+is
+    cursor curs1 is select  Subject.name 
+    from subject join student_subject
+    on subject.ids = student_subject.ids
+    where student_subject.grade = n;
+    rec curs1%ROWTYPE;
+    s float;
+    c int;
+BEGIN
+    s := 0.0;
+    c := 0;
+    open curs1;
+    LOOP
+        FETCH curs1 INTO rec;
+        EXIT WHEN curs1%NOTFOUND;
+        c := c + 1;
+        s := s + rec;
+    END LOOP;
+    CLOSE curs1;
+    return round((s/c),2);
+END;
+
+select grade_avg(3) from dual;
+
+create or replace trigger id_trigger
+    after insert or update on Award
+    for each row
+declare
+    c integer;
+begin
+    select count(*) into c from award where ida = :new.ida;
+    if c = 0 then
+        insert into award(ida) values(:new.ida);
+        dbms_output.put_line('New award sucessful inserted ');
+    end if;
+end;
+
+INSERT INTO AWARD(IDA, Category, ID_SW) VALUES(224,'Hight', 101); 
+
+select * from award;
+
+select * from Scient_work;
+
+
+create or replace procedure odd_subject is
+    cursor curs1 is select name from subject order by ids;
+    rec curs1%ROWTYPE;
+BEGIN
+    open curs1;
+    loop
+        fetch curs1 into rec;
+        exit when curs1%notfound;
+        if curs1%rowcount mod 2 = 1 then
+            dbms_output.put_line(rec.name || ' - ' || rec.sal);
+        end if;
+    end loop;
+    close curs1;
+END;
+
+create or replace view pass_or_fail as
+    select student.cod_s, student.Name , student.age, student.genre, student.grou
+    from student  join student_subject on student.cod_s= student_subject.cod_s 
+    where student_subject.grade BETWEEN 2 AND 5;
+    
+    Create or replace trigger SCIENT_WORK_AND_AWARD
+    instead of insert on pass_or_fail
+begin
+    insert into SCIENT_WORK(ID_SW, TITLE, CATEGORY, PAG) values(:new.id_sw, :new.TITLE, :new.CATEGORY, :new.pag);
+    insert into award(IDA, category, id_sw) values(:new.IDA, :new.category, :new.id_sw);
+    dbms_output.put_line('Successfully inserted into SCIENT_WORK and award!');
+end;
+
+select * from pass_or_fail ;
+
+select * from student_subject;
+
+
+CREATE OR REPLACE TRIGGER INSERT_SCIENT_WORK
+AFTER INSERT
+ON READING
+FOR EACH ROW 
+
+DECLARE
+
+  ID_SWW   NUMBER;
+
+BEGIN 
+
+  Select SCIENT_WORK.ID_SW INTO ID_SWW
+    From SCIENT_WORK
+    Where SCIENT_WORK.ID_SW = :new.ID_SW;
+
+  INSERT INTO AWARD(IDA,CATEGORY,ID_SW) VALUES 
+  (AWARD_IDA_SEQ.nextval, 'Midle' , ID_SWW); 
+
+END;
+
+
+
+create or replace FUNCTION CCATEGORY(CAT CHAR) 
+   RETURN NUMBER IS 
+   QNT NUMBER(7,3);
+   BEGIN 
+      SELECT COUNT(*) INTO QNT 
+      FROM SCIENT_WORK JOIN AWARD ON SCIENT_WORK.ID_SW = AWARD.ID_SW
+      WHERE SCIENT_WORK.category = CAT; 
+      RETURN QNT; 
+    END;
+
+
+
+
+
+create or replace function grade_avg(n integer)
+return number
+is
+    cursor curs1 is select  Subject.name 
+    from subject join student_subject
+    on subject.ids = student_subject.ids
+    where student_subject.grade = n;
+    rec curs1%ROWTYPE;
+    s float;
+    c int;
+BEGIN
+    s := 0.0;
+    c := 0;
+    open curs1;
+    LOOP
+        FETCH curs1 INTO rec;
+        EXIT WHEN curs1%NOTFOUND;
+        c := c + 1;
+        s := s + rec;
+    END LOOP;
+    CLOSE curs1;
+    return round((s/c),2);
+END;
+
+create or replace trigger id_subject_trigger
+    after insert or update on subject
+    for each row
+declare
+    c integer;
+begin
+    select count(*) into c from subject where ids = :new.ids;
+    if c = 0 then
+        insert into subject(ids) values(:new.ids);
+        dbms_output.put_line('New subject inserted too');
+    end if;
+end;
+
+create or replace function PAGE_avg(n integer)
+return number
+is
+    cursor curs1 is select  Scient_work.ID_SW, SCIENT_WORK.TITLE, SCIENT_WORK.CATEGORY, SCIENT_WORK.PAG 
+    from SCIENT_WORK 
+    where SCIENT_WORK.PAG = n;
+    rec curs1%ROWTYPE;
+    s float;
+    c int;
+BEGIN
+    s := 0.0;
+    c := 0;
+    open curs1;
+    LOOP
+        FETCH curs1 INTO rec;
+        EXIT WHEN curs1%NOTFOUND;
+        c := c + 1;
+        s := s + rec.PAG;
+    END LOOP;
+    CLOSE curs1;
+    return round((s/c),2);
+END;
+
+
+SELECT * FROM PAGE_AVG(67);
+
+CREATE USER lkpeter identifid by lkpeter ;
+
+GRANT CONNECT TO lkpeter;
+
+
+
+
